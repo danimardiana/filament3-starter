@@ -1,0 +1,38 @@
+name: filament3-starter
+recipe: laravel
+config:
+  php: '8.2'
+  webroot: public
+  build:
+    - "[ ! -f /app/.env ] && cp /app/.env.example /app/.env"
+    - composer update --prefer-dist
+    - php artisan key:generate
+    # - php artisan migrate --seed
+  command:
+    - php artisan octane:install --server=roadrunner -n
+    - php artisan octane:start --watch --server=roadrunner --host=0.0.0.0 --rpc-port=6001 --port=8000
+  port: 8000
+services:
+  appserver:
+    api: 3
+    build_as_root:
+      - apt update
+      - docker-php-ext-install sockets
+  node:
+    api: 3
+    type: node:18
+  pma:
+    api: 3
+    type: phpmyadmin
+    hosts:
+      - database
+tooling:
+  node:
+    service: node
+  npm:
+    service: node
+proxy:
+  appserver:
+    - filament3-starter.lndo.site
+  pma:
+    - pma.filament3-starter.lndo.site
